@@ -1,20 +1,10 @@
 import axios from 'axios';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Select from 'react-select';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import ClipLoader from 'react-spinners/ClipLoader'; // استيراد مكون التحميل
-
-const App = () => {
-    const [paramedicName, setParamedicName] = useState('');
-    const [rank, setRank] = useState(null);
-    const [trainer, setTrainer] = useState(null);
-    const [date, setDate] = useState(new Date());
-    const [statusCode, setStatusCode] = useState(null);
-    const [caseDetails, setCaseDetails] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
-    const [loading, setLoading] = useState(false); // حالة التحميل
+import ClipLoader from 'react-spinners/ClipLoader';
+import {Link} from "react-router-dom"; // استيراد مكون التحميل
 
     const trainers = [
         { value: 'رقية العبدالله', label: 'رقية العبدالله' },
@@ -47,44 +37,53 @@ const App = () => {
         { value: 'أصفر', label: 'أصفر' }
     ];
 
-    const ApiToken = 'b971a87219994a1b1dca026f9a4a05083a512684b512b64630b935f255d4193ffbab03b8ab8b2c0c2b8399e87d6bf07cab4bdd5c2b311fc7071c041f13c7946ee65e147ec08702ba0dd67d6b9e5944bb065ba762d1b97861db6fadad70dd5a578b15048b757c0659f00fa4a23a00b2ed0fcae40b05a94bbb9887276d6fa6e868'; // تأكد من استخدام التوكن الخاص بك
+
+
+const App = () => {
+    const [paramedicName, setParamedicName] = useState('');
+    const [rank, setRank] = useState(null);
+    const [trainer, setTrainer] = useState(null);
+    const [date, setDate] = useState(new Date());
+    const [statusCode, setStatusCode] = useState(null);
+    const [caseDetails, setCaseDetails] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true); // تعيين حالة التحميل إلى true
+        setLoading(true);
 
         const formData = {
-            data: {
+            data: {  // قد يحتاج Strapi إلى تغليف البيانات في مفتاح 'data'
                 ParamedicName: paramedicName,
                 Rank: rank?.value,
                 Trainer: trainer?.value,
                 Date: date,
                 StatusCode: statusCode?.value,
                 CaseDetails: caseDetails
-            },
+            }
         };
 
         try {
-            const response = await axios.post('http://localhost:1337/api/paramedics', formData, {
+            // استبدل رابط الواجهة الخلفية (API) بـ URL المناسب
+            await axios.post('http://localhost:1337/api/paramedics', formData, {
                 headers: {
-                    Authorization: `Bearer ${ApiToken}`,
-                },
+                    'Authorization': `b971a87219994a1b1dca026f9a4a05083a512684b512b64630b935f255d4193ffbab03b8ab8b2c0c2b8399e87d6bf07cab4bdd5c2b311fc7071c041f13c7946ee65e147ec08702ba0dd67d6b9e5944bb065ba762d1b97861db6fadad70dd5a578b15048b757c0659f00fa4a23a00b2ed0fcae40b05a94bbb9887276d6fa6e868` // استبدل بـ Bearer Token الصحيح
+                }
             });
 
-            if (response.status === 201) {
-                setParamedicName('');
-                setRank(null);
-                setTrainer(null);
-                setDate(new Date());
-                setStatusCode(null);
-                setCaseDetails('');
-                setSuccessMessage('تم إرسال البيانات بنجاح!');
-            }
+            setSuccessMessage('تم إرسال البيانات بنجاح!');
+            setParamedicName('');
+            setRank(null);
+            setTrainer(null);
+            setDate(new Date());
+            setStatusCode(null);
+            setCaseDetails('');
         } catch (error) {
-            console.error('حدث خطأ أثناء إرسال البيانات:', error);
-            setErrorMessage(`حدث خطأ أثناء إرسال البيانات: ${error.response?.data?.error?.message || error.message}`);
+            setErrorMessage(`حدث خطأ أثناء إرسال البيانات: ${error.message}`);
         } finally {
-            setLoading(false); // تعيين حالة التحميل إلى false بعد الانتهاء
+            setLoading(false);
         }
 
         setTimeout(() => {
@@ -93,7 +92,6 @@ const App = () => {
         }, 3000);
     };
 
-    // إذا كانت البيانات قيد التحميل، عرض شاشة التحميل
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen">
@@ -103,80 +101,101 @@ const App = () => {
     }
 
     return (
-        <div dir={'rtl'} className="max-w-screen-md mx-auto p-6 bg-white shadow-lg rounded-xl mt-10 border border-red-200 mb-4">
-            <h1 className="text-3xl font-bold mb-5 text-red-600 text-center">فورم تقييم حالات - Sarc-650</h1>
-            <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">أسم المسعف :</label>
-                    <input
-                        type="text"
-                        value={paramedicName}
-                        onChange={(e) => setParamedicName(e.target.value)}
-                        className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-red-300"
-                        placeholder="ادخل أسم المسعف هنا"
-                        required
-                    />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">رتبة المسعف :</label>
-                    <Select
-                        options={ranks}
-                        value={rank}
-                        onChange={setRank}
-                        className="mt-1"
-                        required
-                    />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">المدرب :</label>
-                    <Select
-                        options={trainers}
-                        value={trainer}
-                        onChange={setTrainer}
-                        className="mt-1"
-                        required
-                    />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">التاريخ :</label>
-                    <DatePicker
-                        selected={date}
-                        onChange={(date) => setDate(date)}
-                        dateFormat="yyyy-MM-dd"
-                        className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-red-300"
-                    />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">كود الحالة :</label>
-                    <Select
-                        options={statusCodes}
-                        value={statusCode}
-                        onChange={setStatusCode}
-                        className="mt-1"
-                        required
-                    />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">تفاصيل الحالة :</label>
-                    <textarea
-                        value={caseDetails}
-                        onChange={(e) => setCaseDetails(e.target.value)}
-                        className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-red-300"
-                        placeholder="أدخل تفاصيل الحالة هنا"
-                        rows={5}
-                        required
-                    />
-                </div>
-                <button
-                    type="submit"
-                    className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg transition duration-200 ease-in-out transform hover:scale-105"
-                >
-                    إرسال
-                </button>
-            </form>
-            {successMessage && <p className="mt-4 text-green-500 text-center">{successMessage}</p>}
-            {errorMessage && <p className="mt-4 text-red-500 text-center">{errorMessage}</p>}
-        </div>
+
+        /*max-w-screen-md mx-auto p-6 bg-gradient-to-r from-gray-800 via-gray-900 to-black shadow-lg rounded-xl mt-10 border border-red-200 mb-4*/
+       <div >
+           <div id={'all'} dir={'rtl'} className="max-w-screen-md mx-auto backdrop-opacity-10 p-6 bg-white shadow-lg rounded-xl mt-10 border border-red-200 mb-4">
+               <div className="flex justify-between items-center mb-5">
+                   <h1 className="text-3xl font-bold text-red-600">فورم تقييم حالات - Sarc-650</h1>
+                   <Link
+                       to={'/Login'}
+                       className="bg-red-600 hover:bg-red-700 text-center text-white font-bold py-2 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105"
+                   >
+                       تسجيل الدخول
+                   </Link>
+               </div>
+               <form onSubmit={handleSubmit}>
+                   <div className="mb-4">
+                       <label className="block text-sm font-medium text-gray-700">أسم المسعف :</label>
+                       <input
+                           type="text"
+                           value={paramedicName}
+                           onChange={(e) => setParamedicName(e.target.value)}
+                           className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-red-300"
+                           placeholder="ادخل أسم المسعف هنا"
+                           required
+                       />
+                   </div>
+                   <div className="mb-4">
+                       <label className="block text-sm font-medium text-gray-700">رتبة المسعف :</label>
+                       <Select
+                           options={ranks}
+                           value={rank}
+                           onChange={setRank}
+                           className="mt-1"
+                           required
+                       />
+                   </div>
+                   <div className="mb-4">
+                       <label className="block text-sm font-medium text-gray-700">المدرب :</label>
+                       <Select
+                           options={trainers}
+                           value={trainer}
+                           onChange={setTrainer}
+                           className="mt-1"
+                           required
+                       />
+                   </div>
+                   <div className="mb-4">
+                       <label className="block text-sm font-medium text-gray-700">التاريخ :</label>
+                       <DatePicker
+                           selected={date}
+                           onChange={(date) => setDate(date)}
+                           dateFormat="yyyy-MM-dd"
+                           className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-red-300"
+                       />
+                   </div>
+                   <div className="mb-4">
+                       <label className="block text-sm font-medium text-gray-700">كود الحالة :</label>
+                       <Select
+                           options={statusCodes}
+                           value={statusCode}
+                           onChange={setStatusCode}
+                           className="mt-1"
+                           required
+                       />
+                   </div>
+                   <div className="mb-4">
+                       <label className="block text-sm font-medium text-gray-700">تفاصيل الحالة :</label>
+                       <textarea
+                           value={caseDetails}
+                           onChange={(e) => setCaseDetails(e.target.value)}
+                           className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-red-300"
+                           placeholder="أدخل تفاصيل الحالة هنا"
+                           rows={5}
+                           required
+                       />
+                   </div>
+                   <button
+                       type="submit"
+                       className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg transition duration-200 ease-in-out transform hover:scale-105"
+                   >
+                       إرسال
+                   </button>
+               </form>
+
+
+
+
+
+
+
+
+
+               {successMessage && <p className="mt-4 text-green-500 text-center">{successMessage}</p>}
+               {errorMessage && <p className="mt-4 text-red-500 text-center">{errorMessage}</p>}
+           </div>
+       </div>
     );
 };
 

@@ -12,13 +12,16 @@
   "dependencies": {
     "axios": "^1.7.7",
     "daisyui": "^4.12.12",
+    "firebase": "^10.14.0",
     "react": "^18.3.1",
     "react-datepicker": "^7.4.0",
     "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2",
     "react-select": "^5.8.1",
     "react-spinners": "^0.14.1",
     "react-toastify": "^10.0.5",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
